@@ -5,7 +5,7 @@ __pycache__/
 .pytest_cache/
 
 # Environment
-.env
+.env.example
 .env.local
 
 # OS

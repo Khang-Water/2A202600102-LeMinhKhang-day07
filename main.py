@@ -9,7 +9,12 @@ from dotenv import load_dotenv
 from src.agent import KnowledgeBaseAgent
 from src.embeddings import (
     EMBEDDING_PROVIDER_ENV,
+    GITHUB_EMBEDDING_MODEL_ENV,
+    GITHUB_MODELS_BASE_URL,
+    GITHUB_MODELS_TOKEN_ENV,
     LOCAL_EMBEDDING_MODEL,
+    OPENAI_API_KEY_ENV,
+    OPENAI_BASE_URL_ENV,
     OPENAI_EMBEDDING_MODEL,
     LocalEmbedder,
     OpenAIEmbedder,
@@ -92,7 +97,20 @@ def run_manual_demo(question: str | None = None, sample_files: list[str] | None 
             embedder = _mock_embed
     elif provider == "openai":
         try:
-            embedder = OpenAIEmbedder(model_name=os.getenv("OPENAI_EMBEDDING_MODEL", OPENAI_EMBEDDING_MODEL))
+            embedder = OpenAIEmbedder(
+                model_name=os.getenv("OPENAI_EMBEDDING_MODEL", OPENAI_EMBEDDING_MODEL),
+                base_url=os.getenv(OPENAI_BASE_URL_ENV),
+                api_key=os.getenv(OPENAI_API_KEY_ENV),
+            )
+        except Exception:
+            embedder = _mock_embed
+    elif provider in {"github", "github_models"}:
+        try:
+            embedder = OpenAIEmbedder(
+                model_name=os.getenv(GITHUB_EMBEDDING_MODEL_ENV, OPENAI_EMBEDDING_MODEL),
+                base_url=os.getenv(OPENAI_BASE_URL_ENV, GITHUB_MODELS_BASE_URL),
+                api_key=os.getenv(GITHUB_MODELS_TOKEN_ENV) or os.getenv(OPENAI_API_KEY_ENV),
+            )
         except Exception:
             embedder = _mock_embed
     else:
